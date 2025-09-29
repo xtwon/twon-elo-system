@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Twon's Jack Elo System (Web)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- PapaParse for safe CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="container" id="screen-main">
+    <h1>Welcome to Twon's Jack Elo System</h1>
+    <p id="rating-text">Loading…</p>
+
+    <div class="actions">
+      <a class="btn" href="https://docs.google.com/document/d/1mq_O9ZUBHLGxWwK37yh2jAim1oT7FEDM5TaMQUhRw-U/edit?usp=sharing" target="_blank">FAQ</a>
+      <button class="btn" id="btn-start">Play</button>
+    </div>
+
+    <p class="muted">message xtwon on discord if you have any questions/suggestions</p>
+  </div>
+
+  <div class="container hidden" id="screen-play">
+    <div class="topbar">
+      <button class="link" id="btn-back">← Back</button>
+      <h2 id="context">Match</h2>
+    </div>
+
+    <div class="map-card">
+      <div id="map-title">Map — Diff (x.xx ?)&nbsp;by Mapper</div>
+      <a id="map-url" href="#" target="_blank" class="link">link</a>
+      <div id="map-meta" class="muted">meta</div>
+      <img id="map-image" alt="map background" />
+      <div id="image-note" class="muted"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn good" id="btn-s">S (≥95%)</button>
+      <button class="btn bad" id="btn-under"> &lt;95 </button>
+      <button class="btn" id="btn-skip">Skip</button>
+    </div>
+
+    <div id="skip-info" class="muted"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
