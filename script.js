@@ -531,7 +531,10 @@ btnDislike.addEventListener("click", () => {
 btnReport.addEventListener("click", () => {
   if (!currentMap) return;
   console.log("⚠️ Report issue with:", currentMap.map_name, "by", currentMap.mapper);
-  window.open("https://example.com/report-form", "_blank"); // replace later
+const mapLabel = `${currentMap.map_name} — ${currentMap.mapper}`;
+const formBase = "https://docs.google.com/forms/d/e/1FAIpQLScM4gTLC0wiZsTZU7Uw5i8ZmW888izA6r-6mHDH_Y8jpplwJQ/viewform?usp=pp_url";
+const fullUrl = `${formBase}&entry.1057683109=${encodeURIComponent(mapLabel)}`;
+window.open(fullUrl, "_blank");
 });
 
 
