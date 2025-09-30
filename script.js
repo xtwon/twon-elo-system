@@ -313,7 +313,7 @@ async function loadMapPool() {
         return {
           map_name: rowObj["Maps"],
           mapper: mapper,
-          diff_name: rowObj["Difficulty"] || row[2] || "",
+          diff_name: (rowObj["Difficulty"] || row[2] || "").trim(),
           url: rowObj["Ø"] || row[3] || "",
           image: rowObj["Background"],
           real_diff: rd
