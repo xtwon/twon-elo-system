@@ -35,8 +35,9 @@ h1, h2 {
 
 .actions {
   display: flex;
+  justify-content: center; /* center all buttons */
   gap: 12px;
-  margin-top: 18px;
+  margin: 18px 0;
   flex-wrap: wrap;
 }
 
@@ -63,6 +64,16 @@ h1, h2 {
 .btn.bad {
   background: var(--bad);
   box-shadow: 0 6px 16px rgba(239,68,68,.3);
+}
+.btn.warning {
+  background: #ffcc00;
+  color: black;
+  font-weight: bold;
+  box-shadow: 0 6px 16px rgba(255, 204, 0, .3);
+}
+.btn.warning:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(255, 204, 0, .5);
 }
 
 .link {
