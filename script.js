@@ -313,10 +313,10 @@ async function loadMapPool() {
         return {
           map_name: rowObj["Maps"],
           mapper: mapper,
-          diff_name: rowObj["Difficulty"],
+          diff_name: rowObj["Difficulty"] || row[2] || "",
           url: rowObj["Ø"] || row[3] || "",
           image: rowObj["Background"],
-          real_diff: rd,
+          real_diff: rd
         };
       })
       .filter(Boolean);
