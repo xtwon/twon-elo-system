@@ -477,25 +477,55 @@ btnS.addEventListener("click", () => resolveMap(true));
 btnUnder.addEventListener("click", () => resolveMap(false));
 btnSkip.addEventListener("click", skipMap);
 
-// New feedback events
-function saveFeedback(mapKey, feedback) {
+// ====== FEEDBACK WITH COOLDOWN ======
+let lastFeedbackTime = 0; // track last feedback
+
+function canSendFeedback() {
+  const now = Date.now();
+  return now - lastFeedbackTime >= 60 * 1000; // 1 minute
+}
+
+function setFeedbackCooldown() {
+  btnLike.disabled = true;
+  btnDislike.disabled = true;
+  setTimeout(() => {
+    btnLike.disabled = false;
+    btnDislike.disabled = false;
+  }, 60 * 1000);
+}
+
+async function sendFeedback(mapKey, feedback) {
+  if (!canSendFeedback()) {
+    alert("You must wait 1 minute before giving feedback again.");
+    return;
+  }
+
+  // local save (can be swapped with API call later)
   let feedbackData = JSON.parse(localStorage.getItem("map_feedback") || "{}");
   feedbackData[mapKey] = feedback;
   localStorage.setItem("map_feedback", JSON.stringify(feedbackData));
+
+  console.log(
+    feedback === "like" ? "👍 Liked map:" : "👎 Disliked map:",
+    currentMap.map_name,
+    "by",
+    currentMap.mapper
+  );
+
+  lastFeedbackTime = Date.now();
+  setFeedbackCooldown();
 }
 
 btnLike.addEventListener("click", () => {
   if (!currentMap) return;
   const key = normalizeKey(currentMap.map_name, currentMap.mapper);
-  saveFeedback(key, "like");
-  console.log("👍 Liked map:", currentMap.map_name, "by", currentMap.mapper);
+  sendFeedback(key, "like");
 });
 
 btnDislike.addEventListener("click", () => {
   if (!currentMap) return;
   const key = normalizeKey(currentMap.map_name, currentMap.mapper);
-  saveFeedback(key, "dislike");
-  console.log("👎 Disliked map:", currentMap.map_name, "by", currentMap.mapper);
+  sendFeedback(key, "dislike");
 });
 
 btnReport.addEventListener("click", () => {
@@ -503,6 +533,7 @@ btnReport.addEventListener("click", () => {
   console.log("⚠️ Report issue with:", currentMap.map_name, "by", currentMap.mapper);
   window.open("https://example.com/report-form", "_blank"); // replace later
 });
+
 
 
 // ====== BOOT ======
