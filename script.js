@@ -479,7 +479,7 @@ btnSkip.addEventListener("click", skipMap);
 
 // ====== FEEDBACK WITH COOLDOWN + GOOGLE SHEETS LOGGING ======
 let lastFeedbackTime = 0; // track last feedback
-const FEEDBACK_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEBAPP_URL"; 
+const FEEDBACK_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2z61356VBjUpCmZMo0TcNC1kb8QXOfHSgKCkP1ZfFlQVcA8pbKYIcSbfd4svflZ0V2w/exec"; 
 // Replace with your deployed Apps Script web app URL
 
 function canSendFeedback() {
