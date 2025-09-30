@@ -502,19 +502,11 @@ async function sendFeedback(mapKey, feedback) {
     return;
   }
 
-  const payload = {
-    map_name: currentMap.map_name,
-    mapper: currentMap.mapper,
-    feedback: feedback
-  };
+  // Build GET request with query params
+  const url = `${FEEDBACK_SCRIPT_URL}?map_name=${encodeURIComponent(currentMap.map_name)}&mapper=${encodeURIComponent(currentMap.mapper)}&feedback=${feedback}`;
 
   try {
-    const resp = await fetch(FEEDBACK_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
+    const resp = await fetch(url);
     const result = await resp.json();
     console.log("✅ Feedback logged:", result);
 
@@ -525,6 +517,7 @@ async function sendFeedback(mapKey, feedback) {
   lastFeedbackTime = Date.now();
   setFeedbackCooldown();
 }
+
 
 btnLike.addEventListener("click", () => {
   if (!currentMap) return;
