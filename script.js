@@ -479,7 +479,7 @@ btnSkip.addEventListener("click", skipMap);
 
 // ====== FEEDBACK WITH COOLDOWN + GOOGLE SHEETS LOGGING ======
 let lastFeedbackTime = 0; // track last feedback
-const FEEDBACK_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypPvhoQ_v4dZIQEYh4LI-Daf0hxeN4digXut6lVsO68PLV1giJHT-kryYh6b96VMldGA/exec"; 
+const FEEDBACK_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCq1EQQUExc4DT3Jb4hwO-52Ezg53Bu1zyqs-mZfpNZGybpubBVzwnBopfnXKMpj0L8w/exec"; 
 // Replace with your deployed Apps Script web app URL
 
 function canSendFeedback() {
