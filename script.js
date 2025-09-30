@@ -506,10 +506,10 @@ async function sendFeedback(mapKey, feedback) {
   const url = `${FEEDBACK_SCRIPT_URL}?map_name=${encodeURIComponent(currentMap.map_name)}&mapper=${encodeURIComponent(currentMap.mapper)}&feedback=${feedback}`;
 
   try {
-    const resp = await fetch(url);
-    await fetch(url, { mode: "no-cors" }); 
-    console.log("✅ Feedback logged:", feedback, currentMap.map_name, "by", currentMap.mapper);
+    // Just send it, don't parse response (browser blocks it anyway)
+    await fetch(url, { method: "GET", mode: "no-cors" });
 
+    console.log("✅ Feedback logged:", feedback, currentMap.map_name, "by", currentMap.mapper);
   } catch (e) {
     console.error("Feedback send failed:", e);
   }
