@@ -509,19 +509,15 @@ async function sendFeedback(mapKey, feedback) {
   };
 
   try {
-    await fetch(FEEDBACK_SCRIPT_URL, {
+    const resp = await fetch(FEEDBACK_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors", // Apps Script often requires no-cors
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    console.log(
-      feedback === "like" ? "👍 Liked map:" : "👎 Disliked map:",
-      currentMap.map_name,
-      "by",
-      currentMap.mapper
-    );
+    const result = await resp.json();
+    console.log("✅ Feedback logged:", result);
+
   } catch (e) {
     console.error("Feedback send failed:", e);
   }
