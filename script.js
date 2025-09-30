@@ -477,8 +477,10 @@ btnS.addEventListener("click", () => resolveMap(true));
 btnUnder.addEventListener("click", () => resolveMap(false));
 btnSkip.addEventListener("click", skipMap);
 
-// ====== FEEDBACK WITH COOLDOWN ======
+// ====== FEEDBACK WITH COOLDOWN + GOOGLE SHEETS LOGGING ======
 let lastFeedbackTime = 0; // track last feedback
+const FEEDBACK_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEBAPP_URL"; 
+// Replace with your deployed Apps Script web app URL
 
 function canSendFeedback() {
   const now = Date.now();
@@ -500,17 +502,29 @@ async function sendFeedback(mapKey, feedback) {
     return;
   }
 
-  // local save (can be swapped with API call later)
-  let feedbackData = JSON.parse(localStorage.getItem("map_feedback") || "{}");
-  feedbackData[mapKey] = feedback;
-  localStorage.setItem("map_feedback", JSON.stringify(feedbackData));
+  const payload = {
+    map_name: currentMap.map_name,
+    mapper: currentMap.mapper,
+    feedback: feedback
+  };
 
-  console.log(
-    feedback === "like" ? "👍 Liked map:" : "👎 Disliked map:",
-    currentMap.map_name,
-    "by",
-    currentMap.mapper
-  );
+  try {
+    await fetch(FEEDBACK_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors", // Apps Script often requires no-cors
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    console.log(
+      feedback === "like" ? "👍 Liked map:" : "👎 Disliked map:",
+      currentMap.map_name,
+      "by",
+      currentMap.mapper
+    );
+  } catch (e) {
+    console.error("Feedback send failed:", e);
+  }
 
   lastFeedbackTime = Date.now();
   setFeedbackCooldown();
@@ -518,24 +532,23 @@ async function sendFeedback(mapKey, feedback) {
 
 btnLike.addEventListener("click", () => {
   if (!currentMap) return;
-  const key = normalizeKey(currentMap.map_name, currentMap.mapper);
-  sendFeedback(key, "like");
+  sendFeedback(normalizeKey(currentMap.map_name, currentMap.mapper), "like");
 });
 
 btnDislike.addEventListener("click", () => {
   if (!currentMap) return;
-  const key = normalizeKey(currentMap.map_name, currentMap.mapper);
-  sendFeedback(key, "dislike");
+  sendFeedback(normalizeKey(currentMap.map_name, currentMap.mapper), "dislike");
 });
 
 btnReport.addEventListener("click", () => {
   if (!currentMap) return;
   console.log("⚠️ Report issue with:", currentMap.map_name, "by", currentMap.mapper);
-const mapLabel = `${currentMap.map_name} — ${currentMap.mapper}`;
-const formBase = "https://docs.google.com/forms/d/e/1FAIpQLScM4gTLC0wiZsTZU7Uw5i8ZmW888izA6r-6mHDH_Y8jpplwJQ/viewform?usp=pp_url";
-const fullUrl = `${formBase}&entry.1057683109=${encodeURIComponent(mapLabel)}`;
-window.open(fullUrl, "_blank");
+  const mapLabel = `${currentMap.map_name} — ${currentMap.mapper}`;
+  const formBase = "https://docs.google.com/forms/d/e/1FAIpQLScM4gTLC0wiZsTZU7Uw5i8ZmW888izA6r-6mHDH_Y8jpplwJQ/viewform?usp=pp_url";
+  const fullUrl = `${formBase}&entry.1057683109=${encodeURIComponent(mapLabel)}`;
+  window.open(fullUrl, "_blank");
 });
+
 
 
 
