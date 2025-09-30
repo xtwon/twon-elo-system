@@ -507,8 +507,8 @@ async function sendFeedback(mapKey, feedback) {
 
   try {
     const resp = await fetch(url);
-    const result = await resp.json();
-    console.log("✅ Feedback logged:", result);
+    await fetch(url, { mode: "no-cors" }); 
+    console.log("✅ Feedback logged:", feedback, currentMap.map_name, "by", currentMap.mapper);
 
   } catch (e) {
     console.error("Feedback send failed:", e);
