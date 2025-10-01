@@ -505,11 +505,21 @@ function setFeedbackCooldown() {
 }
 
 // grab the feedback message element from HTML
+// grab the feedback message element from HTML
 const feedbackMsgEl = document.getElementById("feedback-message");
 
 async function sendFeedback(mapName, mapper, feedback) {
   if (!canSendFeedback()) {
-    alert("You must wait 1 minute before giving feedback again.");
+    // ❌ show cooldown message instead of alert
+    if (feedbackMsgEl) {
+      feedbackMsgEl.style.display = "block";
+      feedbackMsgEl.style.color = "orange";
+      feedbackMsgEl.textContent = "⏳ You must wait before sending feedback again.";
+      setTimeout(() => {
+        feedbackMsgEl.style.display = "none";
+        feedbackMsgEl.style.color = "limegreen"; // reset color for success
+      }, 3000);
+    }
     return;
   }
 
@@ -527,9 +537,10 @@ async function sendFeedback(mapName, mapper, feedback) {
 
     console.log("✅ Feedback logged:", feedback, mapName, "by", mapper);
 
-    // ✅ show confirmation on screen
+    // ✅ show success confirmation
     if (feedbackMsgEl) {
       feedbackMsgEl.style.display = "block";
+      feedbackMsgEl.style.color = "limegreen";
       feedbackMsgEl.textContent = "Feedback sent! Thank you for improving the map pool!";
       setTimeout(() => {
         feedbackMsgEl.style.display = "none";
