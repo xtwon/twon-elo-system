@@ -425,6 +425,16 @@ function drawCurrentMap(placementMode, extra = "") {
 
   if (link) {
     console.log("✅ Found image link:", link);
+
+    // 🔧 Normalize Google Drive links to always use embeddable "uc?id="
+    if (link.includes("drive.google.com")) {
+      const idMatch = link.match(/(?:id=|\/d\/)([-\w]{25,})/);
+      if (idMatch) {
+        link = `https://drive.google.com/uc?id=${idMatch[1]}`;
+        console.log("🔧 Normalized link:", link);
+      }
+    }
+
     mapImgEl.src = link;
     mapImgEl.style.display = "block";
     imageNoteEl.textContent = "";
