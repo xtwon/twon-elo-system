@@ -504,6 +504,9 @@ function setFeedbackCooldown() {
   }, 60 * 1000);
 }
 
+// grab the feedback message element from HTML
+const feedbackMsgEl = document.getElementById("feedback-message");
+
 async function sendFeedback(mapName, mapper, feedback) {
   if (!canSendFeedback()) {
     alert("You must wait 1 minute before giving feedback again.");
@@ -523,6 +526,15 @@ async function sendFeedback(mapName, mapper, feedback) {
     });
 
     console.log("✅ Feedback logged:", feedback, mapName, "by", mapper);
+
+    // ✅ show confirmation on screen
+    if (feedbackMsgEl) {
+      feedbackMsgEl.style.display = "block";
+      feedbackMsgEl.textContent = "Feedback sent! Thank you for improving the map pool!";
+      setTimeout(() => {
+        feedbackMsgEl.style.display = "none";
+      }, 3000);
+    }
   } catch (e) {
     console.error("Feedback send failed:", e);
   }
@@ -540,8 +552,6 @@ btnDislike.addEventListener("click", () => {
   if (!currentMap) return;
   sendFeedback(currentMap.map_name, currentMap.mapper, "Dislike");
 });
-
-
 
 btnReport.addEventListener("click", () => {
   if (!currentMap) return;
