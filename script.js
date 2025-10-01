@@ -423,21 +423,53 @@ function drawCurrentMap(placementMode, extra = "") {
     console.log("🟨 Tried fallback key:", key, "->", !!link);
   }
 
+  async function verifyImageUrl(url) {
+    try {
+      const resp = await fetch(url, { method: "HEAD" });
+      const type = resp.headers.get("content-type");
+      console.log("🧾 Checked content-type:", type, "for", url);
+      return type && type.startsWith("image/");
+    } catch (e) {
+      console.warn("⚠️ Verify failed:", e);
+      return false;
+    }
+  }
+
   if (link) {
     console.log("✅ Found image link:", link);
 
-    // 🔧 Normalize Google Drive links to always use embeddable "uc?id="
+    // 🔧 Normalize Google Drive links
     if (link.includes("drive.google.com")) {
       const idMatch = link.match(/(?:id=|\/d\/)([-\w]{25,})/);
       if (idMatch) {
-        link = `https://drive.google.com/uc?id=${idMatch[1]}`;
-        console.log("🔧 Normalized link:", link);
+        // ✅ Always force download endpoint (works in browser for images)
+        link = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+        console.log("🔧 Forced download link:", link);
       }
     }
 
-    mapImgEl.src = link;
-    mapImgEl.style.display = "block";
-    imageNoteEl.textContent = "";
+    // 🧾 Check if it's a real image
+    verifyImageUrl(link).then(isImage => {
+      if (isImage) {
+        mapImgEl.src = link;
+        mapImgEl.style.display = "block";
+        imageNoteEl.textContent = "";
+      } else {
+        console.warn("❌ Not an image, forcing download endpoint:", link);
+        const idMatch = link.match(/id=([-\\w]{25,})/);
+        if (idMatch) {
+          const downloadUrl = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+          console.log("🔁 Retry with download link:", downloadUrl);
+          mapImgEl.src = downloadUrl;
+          mapImgEl.style.display = "block";
+          imageNoteEl.textContent = "";
+        } else {
+          mapImgEl.removeAttribute("src");
+          mapImgEl.style.display = "none";
+          imageNoteEl.textContent = "[Invalid image link]";
+        }
+      }
+    });
   } else if (m.image) {
     console.log("🔄 Using fallback image from sheet:", m.image);
     mapImgEl.src = m.image;
