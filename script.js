@@ -478,9 +478,17 @@ btnUnder.addEventListener("click", () => resolveMap(false));
 btnSkip.addEventListener("click", skipMap);
 
 // ====== FEEDBACK WITH COOLDOWN + GOOGLE SHEETS LOGGING ======
-let lastFeedbackTime = 0; // track last feedback
-const FEEDBACK_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxX1KTfxxsNFdmy2ueethoMKQ4BNtezarhovAIppB--dyy71eVZyXpMkIK752rR5xQCAQ/exec"; 
-// Replace with your deployed Apps Script web app URL
+// ====== FEEDBACK WITH COOLDOWN + GOOGLE FORM LOGGING ======
+// ====== FEEDBACK WITH COOLDOWN + GOOGLE FORM LOGGING ======
+let lastFeedbackTime = 0;
+
+// Use formResponse endpoint, not viewform
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdMDtUK06INTDA-ARiPPYDnWFqB6uNDitkJ7MWDC11QcjIgtQ/formResponse";
+
+// Your entry IDs from the prefilled link
+const ENTRY_MAPNAME = "entry.222024870";
+const ENTRY_MAPPER = "entry.644179412";
+const ENTRY_FEEDBACK = "entry.1746047793";
 
 function canSendFeedback() {
   const now = Date.now();
@@ -496,20 +504,25 @@ function setFeedbackCooldown() {
   }, 60 * 1000);
 }
 
-async function sendFeedback(mapKey, feedback) {
+async function sendFeedback(mapName, mapper, feedback) {
   if (!canSendFeedback()) {
     alert("You must wait 1 minute before giving feedback again.");
     return;
   }
 
-  // Build GET request with query params
-  const url = `${FEEDBACK_SCRIPT_URL}?map_name=${encodeURIComponent(currentMap.map_name)}&mapper=${encodeURIComponent(currentMap.mapper)}&feedback=${feedback}`;
+  const formData = new URLSearchParams();
+  formData.append(ENTRY_MAPNAME, mapName);
+  formData.append(ENTRY_MAPPER, mapper);
+  formData.append(ENTRY_FEEDBACK, feedback);
 
   try {
-    // Just send it, don't parse response (browser blocks it anyway)
-    await fetch(url, { method: "GET", mode: "no-cors" });
+    await fetch(FORM_URL, {
+      method: "POST",
+      body: formData,
+      mode: "no-cors" // silent submit
+    });
 
-    console.log("✅ Feedback logged:", feedback, currentMap.map_name, "by", currentMap.mapper);
+    console.log("✅ Feedback logged:", feedback, mapName, "by", mapper);
   } catch (e) {
     console.error("Feedback send failed:", e);
   }
@@ -518,16 +531,17 @@ async function sendFeedback(mapKey, feedback) {
   setFeedbackCooldown();
 }
 
-
 btnLike.addEventListener("click", () => {
   if (!currentMap) return;
-  sendFeedback(normalizeKey(currentMap.map_name, currentMap.mapper), "like");
+  sendFeedback(currentMap.map_name, currentMap.mapper, "Like");
 });
 
 btnDislike.addEventListener("click", () => {
   if (!currentMap) return;
-  sendFeedback(normalizeKey(currentMap.map_name, currentMap.mapper), "dislike");
+  sendFeedback(currentMap.map_name, currentMap.mapper, "Dislike");
 });
+
+
 
 btnReport.addEventListener("click", () => {
   if (!currentMap) return;
