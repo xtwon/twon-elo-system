@@ -142,8 +142,6 @@ function normalizeKey(mapName, mapper) {
   return mapName.trim() + "_" + mapper.trim();
 }
 
-
-
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
   constructor(pool) {
@@ -409,22 +407,34 @@ function drawCurrentMap(placementMode, extra = "") {
   let key = normalizeKey(m.map_name || "", m.mapper || "");
   let link = driveLinks[key];
 
+  // Debug: log raw map + mapper values
+  console.log("🟦 Map debug:", {
+    map_name: m.map_name,
+    mapper: m.mapper,
+    normalizedKey: key,
+    hasLink: !!link,
+    fallbackImage: m.image || null
+  });
+
   // Only fallback to twon if mapper is empty/missing
   if (!link && (!m.mapper || m.mapper.trim() === "")) {
     key = normalizeKey(m.map_name || "", "twon");
     link = driveLinks[key];
+    console.log("🟨 Tried fallback key:", key, "->", !!link);
   }
 
-  console.log("Looking for image with key:", key);
-  imageNoteEl.textContent = "";
-
   if (link) {
+    console.log("✅ Found image link:", link);
     mapImgEl.src = link;
     mapImgEl.style.display = "block";
+    imageNoteEl.textContent = "";
   } else if (m.image) {
+    console.log("🔄 Using fallback image from sheet:", m.image);
     mapImgEl.src = m.image;
     mapImgEl.style.display = "block";
+    imageNoteEl.textContent = "";
   } else {
+    console.warn("❌ No image found for key:", key);
     mapImgEl.removeAttribute("src");
     mapImgEl.style.display = "none";
     imageNoteEl.textContent = "[No image found]";
