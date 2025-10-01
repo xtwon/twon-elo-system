@@ -138,8 +138,10 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  return `${mapName}_${mapper}`.replace(/\s+/g, "_").trim();
+  // Match JSON format exactly: "<map name>_<mapper>", with spaces preserved
+  return `${mapName}${mapper ? "_" + mapper : ""}`.trim();
 }
+
 
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
