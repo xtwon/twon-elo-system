@@ -138,9 +138,10 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  return (mapName.trim() + "_" + mapper.trim())
-    .replace(/\s+/g, "_")      // spaces → underscores
-    .replace(/[^\w\.-]/g, ""); // strip weird chars except _, ., -
+  // Replace spaces with underscores, keep punctuation the same
+  const safeName = mapName.trim().replace(/\s+/g, "_");
+  const safeMapper = mapper.trim().replace(/\s+/g, "_");
+  return `${safeName}_${safeMapper}`;
 }
 
 // ====== PLACEMENT SESSION ======
