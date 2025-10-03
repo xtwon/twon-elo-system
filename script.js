@@ -1,7 +1,7 @@
 // ====== CONFIG ======
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1EvZ123peUPNKv9VpF88IOZv26D2klj8ptAOe0HGcVcvFJT6-UxyMbLHxYijurM63axdLM6UiPGCs/pub?output=csv";
-const DRIVE_LINKS_URL = "drive_links.json"; // local static file
+const DRIVE_LINKS_URL = "https://raw.githubusercontent.com/xtwon/twon-elo-system/main/drive_links.json";
 
 // Placement config
 const PLACEMENT_COUNT = 5;
