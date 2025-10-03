@@ -1,7 +1,8 @@
 // ====== CONFIG ======
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1EvZ123peUPNKv9VpF88IOZv26D2klj8ptAOe0HGcVcvFJT6-UxyMbLHxYijurM63axdLM6UiPGCs/pub?output=csv";
-const DRIVE_LINKS_URL = "https://raw.githubusercontent.com/xtwon/twon-elo-system/main/drive_links.json";
+const DRIVE_LINKS_URL =
+  "https://raw.githubusercontent.com/xtwon/twon-elo-system/main/drive_links.json";
 
 // Placement config
 const PLACEMENT_COUNT = 5;
@@ -76,7 +77,6 @@ function diffToSymbol(value) {
     [11.0, 11.25, "η"],
     [11.26, 11.5, "η+"],
   ];
-
   for (const [lo, hi, sym] of ranges) {
     if (value >= lo && value <= hi) return sym;
   }
@@ -86,11 +86,9 @@ function diffToSymbol(value) {
 function resolveRealUrl(pool, candidate) {
   if (candidate.url && candidate.url.toLowerCase().startsWith("http"))
     return candidate.url;
-
   const same = pool.filter(
     (m) => m.map_name === candidate.map_name && m.mapper === candidate.mapper
   );
-
   for (const m of same) {
     if (m.url && m.url.startsWith("https://osu.ppy.sh/beatmapsets/"))
       return m.url;
@@ -102,7 +100,6 @@ function updateRating(currentRating, playedDiff, sRanked) {
   const delta = playedDiff - currentRating;
   const scale = Math.min(1.0, Math.abs(delta) / MATCHMAKING_BAND);
   const bonusMult = 1.0 + BONUS_SCALE * scale;
-
   let newRating;
   if (sRanked) {
     newRating = currentRating + BASE_GAIN * bonusMult;
@@ -111,18 +108,15 @@ function updateRating(currentRating, playedDiff, sRanked) {
       playedDiff < currentRating ? 1.0 + BONUS_SCALE * scale : 1.0;
     newRating = currentRating - BASE_LOSS * belowMult;
   }
-
   return Math.max(0.0, +newRating.toFixed(2));
 }
 
 function pickPostMap(pool, rating) {
   const lo = rating - MATCHMAKING_BAND;
   const hi = rating + MATCHMAKING_BAND;
-
   let choices = pool.filter(
     (m) => m.real_diff >= lo && m.real_diff <= hi
   );
-
   if (!choices.length) {
     choices = [...pool]
       .sort(
@@ -131,15 +125,12 @@ function pickPostMap(pool, rating) {
       )
       .slice(0, 20);
   }
-
   if (!choices.length) return null;
-
   return choices[Math.floor(Math.random() * choices.length)];
 }
 
 function normalizeKey(mapName, mapper) {
   let key = (mapName + "_" + mapper).toLowerCase();
-
   const subs = {
     "*": "_star_",
     "&": "_and_",
@@ -154,59 +145,33 @@ function normalizeKey(mapName, mapper) {
     ".": "_dot_",
     "'": "",
     '"': "",
-    "[": "", "]": "",
-    "(": "", ")": "",
-    "<": "", ">": "",
+    "[": "",
+    "]": "",
+    "(": "",
+    ")": "",
+    "<": "",
+    ">": "",
     "~": "_tilde_",
   };
-
   for (const [k, v] of Object.entries(subs)) {
     key = key.split(k).join(v);
   }
-
-  // Replace anything not allowed
-  key = key.replace(/[^a-z0-9_\-]/g, "_");
-
-  // Collapse underscores
-  key = key.replace(/_+/g, "_");
-
+  key = key.replace(/[^a-z0-9_\-]/g, "_"); // Replace anything not allowed
+  key = key.replace(/_+/g, "_"); // Collapse underscores
   return key.replace(/^_+|_+$/g, ""); // trim edges
 }
 
 function findClosestKey(normalizedKey) {
-  // ✅ Exact match
-  if (driveLinks[normalizedKey]) {
-    return { key: normalizedKey, url: driveLinks[normalizedKey], fuzzy: false };
-  }
-
-  // ✅ Fuzzy substring match
-  const candidates = Object.keys(driveLinks).filter(k =>
-    k.includes(normalizedKey) || normalizedKey.includes(k)
+  if (driveLinks[normalizedKey]) return driveLinks[normalizedKey]; // ✅ Exact first
+  const candidates = Object.keys(driveLinks).filter(
+    (k) => k.includes(normalizedKey) || normalizedKey.includes(k)
   );
-
   if (candidates.length) {
     console.warn("🔎 Using fuzzy match:", candidates[0], "for", normalizedKey);
-    return { key: candidates[0], url: driveLinks[candidates[0]], fuzzy: true };
+    return driveLinks[candidates[0]];
   }
-
-  return { key: normalizedKey, url: null, fuzzy: false };
+  return null;
 }
-
-// usage in drawCurrentMap
-let key = normalizeKey(m.map_name || "", m.mapper || "");
-let result = findClosestKey(key);
-let link = result.url;
-
-// Debug: log raw map + mapper values
-console.log("🟦 Map debug:", {
-  map_name: m.map_name,
-  mapper: m.mapper,
-  normalizedKey: key,
-  matchedKey: result.key,
-  fuzzy: result.fuzzy,
-  hasLink: !!link,
-  fallbackImage: m.image || null
-});
 
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
@@ -220,7 +185,6 @@ class PlacementSession {
     this.minFail = null;
     this.anchorPlayed = [];
   }
-
   nextTargetDiff() {
     if (this.maxSuccess === null && this.minFail === null) {
       return +(rand(PLACEMENT_MIN, PLACEMENT_MAX).toFixed(2));
@@ -242,7 +206,6 @@ class PlacementSession {
     }
     return +Math.min(target, this.high).toFixed(2);
   }
-
   pickMapNear(targetDiff, band = 0.1) {
     let step = band;
     while (step <= 0.5) {
@@ -262,7 +225,6 @@ class PlacementSession {
     }
     return null;
   }
-
   registerResult(playedDiff, sRanked) {
     this.anchorPlayed.push([playedDiff, sRanked]);
     if (sRanked) {
@@ -280,7 +242,6 @@ class PlacementSession {
     }
     this.remaining -= 1;
   }
-
   ratingResult() {
     if (this.maxSuccess !== null && this.minFail !== null) {
       return +(((this.maxSuccess + this.minFail) / 2).toFixed(2));
@@ -315,7 +276,6 @@ const skipInfoEl = document.getElementById("skip-info");
 const btnLike = document.getElementById("btn-like");
 const btnDislike = document.getElementById("btn-dislike");
 const btnReport = document.getElementById("btn-report");
-
 
 // ====== UI FUNCTIONS ======
 function showMain() {
@@ -383,7 +343,7 @@ async function loadMapPool() {
           diff_name: (rowObj["Difficulty"] || row[2] || "").trim(),
           url: rowObj["Ø"] || row[3] || "",
           image: rowObj["Background"],
-          real_diff: rd
+          real_diff: rd,
         };
       })
       .filter(Boolean);
@@ -479,7 +439,7 @@ function drawCurrentMap(placementMode, extra = "") {
     mapper: m.mapper,
     normalizedKey: key,
     hasLink: !!link,
-    fallbackImage: m.image || null
+    fallbackImage: m.image || null,
   });
 
   // Only fallback to twon if mapper is empty/missing
@@ -508,14 +468,12 @@ function drawCurrentMap(placementMode, extra = "") {
     if (link.includes("drive.google.com")) {
       const idMatch = link.match(/(?:id=|\/d\/)([-\w]{25,})/);
       if (idMatch) {
-        // ✅ Always force download endpoint (works in browser for images)
         link = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
         console.log("🔧 Forced download link:", link);
       }
     }
 
-    // 🧾 Check if it's a real image
-    verifyImageUrl(link).then(isImage => {
+    verifyImageUrl(link).then((isImage) => {
       if (isImage) {
         mapImgEl.src = link;
         mapImgEl.style.display = "block";
@@ -598,13 +556,12 @@ btnS.addEventListener("click", () => resolveMap(true));
 btnUnder.addEventListener("click", () => resolveMap(false));
 btnSkip.addEventListener("click", skipMap);
 
-// ====== FEEDBACK WITH COOLDOWN + GOOGLE SHEETS LOGGING ======
-// ====== FEEDBACK WITH COOLDOWN + GOOGLE FORM LOGGING ======
 // ====== FEEDBACK WITH COOLDOWN + GOOGLE FORM LOGGING ======
 let lastFeedbackTime = 0;
 
 // Use formResponse endpoint, not viewform
-const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdMDtUK06INTDA-ARiPPYDnWFqB6uNDitkJ7MWDC11QcjIgtQ/formResponse";
+const FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdMDtUK06INTDA-ARiPPYDnWFqB6uNDitkJ7MWDC11QcjIgtQ/formResponse";
 
 // Your entry IDs from the prefilled link
 const ENTRY_MAPNAME = "entry.222024870";
@@ -625,20 +582,18 @@ function setFeedbackCooldown() {
   }, 60 * 1000);
 }
 
-// grab the feedback message element from HTML
-// grab the feedback message element from HTML
 const feedbackMsgEl = document.getElementById("feedback-message");
 
 async function sendFeedback(mapName, mapper, feedback) {
   if (!canSendFeedback()) {
-    // ❌ show cooldown message instead of alert
     if (feedbackMsgEl) {
       feedbackMsgEl.style.display = "block";
       feedbackMsgEl.style.color = "orange";
-      feedbackMsgEl.textContent = "⏳ You must wait before sending feedback again.";
+      feedbackMsgEl.textContent =
+        "⏳ You must wait before sending feedback again.";
       setTimeout(() => {
         feedbackMsgEl.style.display = "none";
-        feedbackMsgEl.style.color = "limegreen"; // reset color for success
+        feedbackMsgEl.style.color = "limegreen";
       }, 3000);
     }
     return;
@@ -653,16 +608,16 @@ async function sendFeedback(mapName, mapper, feedback) {
     await fetch(FORM_URL, {
       method: "POST",
       body: formData,
-      mode: "no-cors" // silent submit
+      mode: "no-cors", // silent submit
     });
 
     console.log("✅ Feedback logged:", feedback, mapName, "by", mapper);
 
-    // ✅ show success confirmation
     if (feedbackMsgEl) {
       feedbackMsgEl.style.display = "block";
       feedbackMsgEl.style.color = "limegreen";
-      feedbackMsgEl.textContent = "Feedback sent! Thank you for improving the map pool!";
+      feedbackMsgEl.textContent =
+        "Feedback sent! Thank you for improving the map pool!";
       setTimeout(() => {
         feedbackMsgEl.style.display = "none";
       }, 3000);
@@ -687,15 +642,18 @@ btnDislike.addEventListener("click", () => {
 
 btnReport.addEventListener("click", () => {
   if (!currentMap) return;
-  console.log("⚠️ Report issue with:", currentMap.map_name, "by", currentMap.mapper);
+  console.log(
+    "⚠️ Report issue with:",
+    currentMap.map_name,
+    "by",
+    currentMap.mapper
+  );
   const mapLabel = `${currentMap.map_name} — ${currentMap.mapper}`;
-  const formBase = "https://docs.google.com/forms/d/e/1FAIpQLScM4gTLC0wiZsTZU7Uw5i8ZmW888izA6r-6mHDH_Y8jpplwJQ/viewform?usp=pp_url";
+  const formBase =
+    "https://docs.google.com/forms/d/e/1FAIpQLScM4gTLC0wiZsTZU7Uw5i8ZmW888izA6r-6mHDH_Y8jpplwJQ/viewform?usp=pp_url";
   const fullUrl = `${formBase}&entry.1057683109=${encodeURIComponent(mapLabel)}`;
   window.open(fullUrl, "_blank");
 });
-
-
-
 
 // ====== BOOT ======
 (async function boot() {
