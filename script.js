@@ -173,6 +173,23 @@ function normalizeKey(mapName, mapper) {
   return key.replace(/^_+|_+$/g, ""); // trim edges
 }
 
+function findClosestKey(normalizedKey) {
+  // ✅ Exact first
+  if (driveLinks[normalizedKey]) return driveLinks[normalizedKey];
+
+  // ✅ Try fuzzy: substring match
+  const candidates = Object.keys(driveLinks).filter(k =>
+    k.includes(normalizedKey) || normalizedKey.includes(k)
+  );
+
+  if (candidates.length) {
+    console.warn("🔎 Using fuzzy match:", candidates[0], "for", normalizedKey);
+    return driveLinks[candidates[0]];
+  }
+
+  return null;
+}
+
 
 
 // ====== PLACEMENT SESSION ======
@@ -438,7 +455,7 @@ function drawCurrentMap(placementMode, extra = "") {
   mapMetaEl.textContent = extra;
 
   let key = normalizeKey(m.map_name || "", m.mapper || "");
-  let link = driveLinks[key];
+  let link = findClosestKey(key);
 
   // Debug: log raw map + mapper values
   console.log("🟦 Map debug:", {
