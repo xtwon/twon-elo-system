@@ -138,9 +138,9 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  return mapName.trim().replace(/\s+/g, "_") + "_" + mapper.trim().replace(/\s+/g, "_");
+  return (mapName.trim() + "_" + mapper.trim())
+    .replace(/\*/g, ""); // strip asterisks so it matches
 }
-
 
 
 // ====== PLACEMENT SESSION ======
