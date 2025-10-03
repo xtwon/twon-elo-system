@@ -138,25 +138,9 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  // Make keys match your GitHub filenames / drive_links.json keys
-  // - spaces -> _
-  // - apostrophes ', ’, and quotes ", “, ” -> removed
-  // - asterisks * -> removed
-  // - keep letters, digits, _, -, (), ~
-  // - replace everything else with _
-  // - collapse multiple _
-
-  const sanitize = (s) =>
-    s
-      .trim()
-      .normalize("NFKC")
-      .replace(/\s+/g, "_")             // spaces -> _
-      .replace(/[’'“”"*]/g, "")         // strip ' " * (all quote types)
-      .replace(/[^\w\-\(\)~]/g, "_")    // non [A-Za-z0-9_ - ( ) ~] -> _
-      .replace(/_+/g, "_");             // collapse __ -> _
-
-  return `${sanitize(mapName)}_${sanitize(mapper)}`;
+  return mapName.trim().replace(/\s+/g, "_") + "_" + mapper.trim().replace(/\s+/g, "_");
 }
+
 
 
 // ====== PLACEMENT SESSION ======
