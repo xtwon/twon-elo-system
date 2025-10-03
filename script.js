@@ -174,23 +174,39 @@ function normalizeKey(mapName, mapper) {
 }
 
 function findClosestKey(normalizedKey) {
-  // ✅ Exact first
-  if (driveLinks[normalizedKey]) return driveLinks[normalizedKey];
+  // ✅ Exact match
+  if (driveLinks[normalizedKey]) {
+    return { key: normalizedKey, url: driveLinks[normalizedKey], fuzzy: false };
+  }
 
-  // ✅ Try fuzzy: substring match
+  // ✅ Fuzzy substring match
   const candidates = Object.keys(driveLinks).filter(k =>
     k.includes(normalizedKey) || normalizedKey.includes(k)
   );
 
   if (candidates.length) {
     console.warn("🔎 Using fuzzy match:", candidates[0], "for", normalizedKey);
-    return driveLinks[candidates[0]];
+    return { key: candidates[0], url: driveLinks[candidates[0]], fuzzy: true };
   }
 
-  return null;
+  return { key: normalizedKey, url: null, fuzzy: false };
 }
 
+// usage in drawCurrentMap
+let key = normalizeKey(m.map_name || "", m.mapper || "");
+let result = findClosestKey(key);
+let link = result.url;
 
+// Debug: log raw map + mapper values
+console.log("🟦 Map debug:", {
+  map_name: m.map_name,
+  mapper: m.mapper,
+  normalizedKey: key,
+  matchedKey: result.key,
+  fuzzy: result.fuzzy,
+  hasLink: !!link,
+  fallbackImage: m.image || null
+});
 
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
