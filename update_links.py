@@ -13,23 +13,39 @@ def normalize_filename_for_key(name: str) -> str:
     # Remove extension
     name = os.path.splitext(name)[0]
 
+    # Lowercase for consistency
+    name = name.lower()
+
     # Replace spaces with underscores
     name = name.replace(" ", "_")
 
-    # Handle apostrophes -> _s
-    name = re.sub(r"'s", "_s", name)  # K1RA's -> K1RA_s
-    name = name.replace("'", "")      # remove stray single quotes
+    # Special substitutions (safe surrogates)
+    subs = {
+        "*": "_star_",
+        "&": "_and_",
+        "!": "_bang_",
+        "%": "_pct_",
+        "+": "_plus_",
+        "=": "_eq_",
+        "?": "_qmark_",
+        ":": "_colon_",
+        ";": "_semi_",
+        ",": "_comma_",
+        ".": "_dot_",
+        "'": "",   # drop apostrophes
+        '"': "",   # drop quotes
+        "[": "", "]": "",
+        "(": "", ")": "",
+        "<": "", ">": "",
+        "~": "_tilde_",
+    }
+    for k, v in subs.items():
+        name = name.replace(k, v)
 
-    # Replace * with nothing (or collapse to single underscore)
-    name = name.replace("*", "")
+    # Remove any leftover illegal characters
+    name = re.sub(r"[^a-z0-9_\-]", "_", name)
 
-    # Replace quotes
-    name = name.replace('"', "")
-    
-    # Replace other odd chars (~, <, >) with underscores
-    name = re.sub(r"[^A-Za-z0-9_\-()]", "_", name)
-
-    # Collapse multiple underscores into single
+    # Collapse multiple underscores
     name = re.sub(r"_+", "_", name)
 
     return name.strip("_")

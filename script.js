@@ -138,11 +138,41 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  // Match Python exactly: trim + replace spaces with underscores
-  const safeMap = (mapName || "").trim().replace(/ /g, "_");
-  const safeMapper = (mapper || "").trim().replace(/ /g, "_");
-  return safeMap + "_" + safeMapper;
+  let key = (mapName + "_" + mapper).toLowerCase();
+
+  const subs = {
+    "*": "_star_",
+    "&": "_and_",
+    "!": "_bang_",
+    "%": "_pct_",
+    "+": "_plus_",
+    "=": "_eq_",
+    "?": "_qmark_",
+    ":": "_colon_",
+    ";": "_semi_",
+    ",": "_comma_",
+    ".": "_dot_",
+    "'": "",
+    '"': "",
+    "[": "", "]": "",
+    "(": "", ")": "",
+    "<": "", ">": "",
+    "~": "_tilde_",
+  };
+
+  for (const [k, v] of Object.entries(subs)) {
+    key = key.split(k).join(v);
+  }
+
+  // Replace anything not allowed
+  key = key.replace(/[^a-z0-9_\-]/g, "_");
+
+  // Collapse underscores
+  key = key.replace(/_+/g, "_");
+
+  return key.replace(/^_+|_+$/g, ""); // trim edges
 }
+
 
 
 // ====== PLACEMENT SESSION ======
