@@ -138,8 +138,9 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  // Match JSON exactly: "<map name>_<mapper>", only strip outer whitespace
-  return mapName.trim() + "_" + mapper.trim();
+  return (mapName.trim() + "_" + mapper.trim())
+    .replace(/\s+/g, "_")      // spaces → underscores
+    .replace(/[^\w\.-]/g, ""); // strip weird chars except _, ., -
 }
 
 // ====== PLACEMENT SESSION ======
