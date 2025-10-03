@@ -138,8 +138,12 @@ function pickPostMap(pool, rating) {
 }
 
 function normalizeKey(mapName, mapper) {
-  return mapName.trim().replace(/\s+/g, "_") + "_" + mapper.trim().replace(/\s+/g, "_");
+  // Match Python exactly: trim + replace spaces with underscores
+  const safeMap = (mapName || "").trim().replace(/ /g, "_");
+  const safeMapper = (mapper || "").trim().replace(/ /g, "_");
+  return safeMap + "_" + safeMapper;
 }
+
 
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
