@@ -161,17 +161,66 @@ function normalizeKey(mapName, mapper) {
   return key.replace(/^_+|_+$/g, ""); // trim edges
 }
 
-function findClosestKey(normalizedKey) {
-  if (driveLinks[normalizedKey]) return driveLinks[normalizedKey]; // ✅ Exact first
-  const candidates = Object.keys(driveLinks).filter(
-    (k) => k.includes(normalizedKey) || normalizedKey.includes(k)
-  );
-  if (candidates.length) {
-    console.warn("🔎 Using fuzzy match:", candidates[0], "for", normalizedKey);
-    return driveLinks[candidates[0]];
+// ====== UTIL: String Similarity ======
+function similarity(a, b) {
+  if (!a.length && !b.length) return 1.0;
+  const longer = a.length > b.length ? a : b;
+  const shorter = a.length > b.length ? b : a;
+  const longerLength = longer.length;
+  if (longerLength === 0) return 1.0;
+  return (longerLength - editDistance(longer, shorter)) / longerLength;
+}
+
+function editDistance(s1, s2) {
+  s1 = s1.toLowerCase();
+  s2 = s2.toLowerCase();
+
+  const costs = [];
+  for (let i = 0; i <= s1.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= s2.length; j++) {
+      if (i === 0) {
+        costs[j] = j;
+      } else if (j > 0) {
+        let newValue = costs[j - 1];
+        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+          newValue =
+            Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        }
+        costs[j - 1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if (i > 0) costs[s2.length] = lastValue;
   }
+  return costs[s2.length];
+}
+
+// ====== NEW FUZZY KEY SEARCH ======
+function findClosestKey(normalizedKey) {
+  if (driveLinks[normalizedKey]) return driveLinks[normalizedKey]; // ✅ exact
+
+  let bestKey = null;
+  let bestScore = 0;
+
+  for (const k of Object.keys(driveLinks)) {
+    const score = similarity(normalizedKey, k);
+    if (score > bestScore) {
+      bestScore = score;
+      bestKey = k;
+    }
+  }
+
+  if (bestKey && bestScore >= 0.75) {
+    console.warn(
+      `🔎 Fuzzy match: "${bestKey}" (${(bestScore * 100).toFixed(1)}%) for "${normalizedKey}"`
+    );
+    return driveLinks[bestKey];
+  }
+
   return null;
 }
+
 
 // ====== PLACEMENT SESSION ======
 class PlacementSession {
